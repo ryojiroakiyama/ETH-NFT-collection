@@ -5,11 +5,11 @@ pragma solidity ^0.8.4;
 // いくつかの OpenZeppelin のコントラクトをインポートします。
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-
 // utils ライブラリをインポートして文字列の処理を行います。
 import "@openzeppelin/contracts/utils/Counters.sol";
-
 import "hardhat/console.sol";
+// Base64.solコントラクトからSVGとJSONをBase64に変換する関数をインポートします。
+import {Base64} from "./libraries/Base64.sol";
 
 // インポートした OpenZeppelin のコントラクトを継承しています。
 // 継承したコントラクトのメソッドにアクセスできるようになります。
@@ -28,29 +28,22 @@ contract MyEpicNFT is ERC721URIStorage {
         "<svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 350 350'><style>.base { fill: white; font-family: serif; font-size: 24px; }</style><rect width='100%' height='100%' fill='black' /><text x='50%' y='50%' class='base' dominant-baseline='middle' text-anchor='middle'>";
 
     // 3つの配列 string[] に、それぞれランダムな単語を設定しましょう。
-    string[] firstWords = [
-        "1YOUR_WORD",
-        "2YOUR_WORD",
-        "3YOUR_WORD",
-        "4YOUR_WORD",
-        "5YOUR_WORD",
-        "6YOUR_WORD"
-    ];
+    string[] firstWords = ["raccoon", "dog", "cow", "wolf", "zebra", "skunk"];
     string[] secondWords = [
-        "7YOUR_WORD",
-        "8YOUR_WORD",
-        "9YOUR_WORD",
-        "10YOUR_WORD",
-        "11YOUR_WORD",
-        "12YOUR_WORD"
+        "bend",
+        "break",
+        "carry",
+        "collect",
+        "flick",
+        "load"
     ];
     string[] thirdWords = [
-        "13YOUR_WORD",
-        "14YOUR_WORD",
-        "15YOUR_WORD",
-        "16YOUR_WORD",
-        "17YOUR_WORD",
-        "18YOUR_WORD"
+        "bottle",
+        "bucket",
+        "calculator",
+        "chopsticks",
+        "mop",
+        "candle"
     ];
 
     // NFT トークンの名前とそのシンボルを渡します。
@@ -124,9 +117,14 @@ contract MyEpicNFT is ERC721URIStorage {
         string memory second = pickRandomSecondWord(newItemId);
         string memory third = pickRandomThirdWord(newItemId);
 
+        // 3つの単語を連携して格納する変数 combinedWord を定義します。
+        string memory combinedWord = string(
+            abi.encodePacked(first, second, third)
+        );
+
         // 3つの単語を連結して、<text>タグと<svg>タグで閉じます。
         string memory finalSvg = string(
-            abi.encodePacked(baseSvg, first, second, third, "</text></svg>")
+            abi.encodePacked(baseSvg, combinedWord, "</text></svg>")
         );
 
         // NFTに出力されるテキストをターミナルに出力します。
@@ -134,12 +132,37 @@ contract MyEpicNFT is ERC721URIStorage {
         console.log(finalSvg);
         console.log("--------------------\n");
 
+        // JSONファイルを所定の位置に取得し、base64としてエンコードします。
+        string memory json = Base64.encode(
+            bytes(
+                string(
+                    abi.encodePacked(
+                        '{"name": "',
+                        // NFTのタイトルを生成される言葉（例: GrandCuteBird）に設定します。
+                        combinedWord,
+                        '", "description": "A highly acclaimed collection of squares.", "image": "data:image/svg+xml;base64,',
+                        //  data:image/svg+xml;base64 を追加し、SVG を base64 でエンコードした結果を追加します。
+                        Base64.encode(bytes(finalSvg)),
+                        '"}'
+                    )
+                )
+            )
+        );
+
+        // データの先頭に data:application/json;base64 を追加します。
+        string memory finalTokenUri = string(
+            abi.encodePacked("data:application/json;base64,", json)
+        );
+
+        console.log("\n----- Token URI ----");
+        console.log(finalTokenUri);
+        console.log("--------------------\n");
+
         // msg.sender を使って NFT を送信者に Mint します。
         _safeMint(msg.sender, newItemId);
 
-        // tokenURI は後で設定します。
-        // 今は、tokenURI の代わりに、"We will set tokenURI later." を設定します。
-        _setTokenURI(newItemId, "We will set tokenURI later.");
+        // tokenURIを更新します。
+        _setTokenURI(newItemId, finalTokenUri);
 
         // NFTがいつ誰に作成されたかを確認します。
         console.log(

@@ -7,8 +7,8 @@ const main = async () => {
   let maxttokenids = await nftContract.maxNumOfTokens();
   console.log("MAXNUMOFTOKENS: ", maxttokenids.toNumber());
 
-  let NextTokenIds = await nftContract.NextTokenIds();
-  console.log("NextTokenIds: ", NextTokenIds.toNumber());
+  let nextTokenIds = await nftContract.nextTokenIds();
+  console.log("nextTokenIds: ", nextTokenIds.toNumber());
 
   // makeAnEpicNFT 関数を呼び出す。NFT が Mint される。
   let txn = await nftContract.makeAnEpicNFT();
@@ -19,8 +19,8 @@ const main = async () => {
   // Minting が仮想マイナーにより、承認されるのを待つ。
   await txn.wait();
 
-  NextTokenIds = await nftContract.NextTokenIds();
-  console.log("NextTokenIds: ", NextTokenIds.toNumber());
+  nextTokenIds = await nftContract.nextTokenIds();
+  console.log("nextTokenIds: ", nextTokenIds.toNumber());
 };
 const runMain = async () => {
   try {

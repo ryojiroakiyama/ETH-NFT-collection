@@ -26,7 +26,7 @@ contract MyEpicNFT is ERC721URIStorage {
         return MAXNUMOFTOKENS;
     }
 
-    function NextTokenIds() public view returns (uint256) {
+    function nextTokenIds() public view returns (uint256) {
         return _tokenIds.current();
     }
 

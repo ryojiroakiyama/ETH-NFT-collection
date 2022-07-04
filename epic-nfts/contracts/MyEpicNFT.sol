@@ -15,7 +15,7 @@ import {Base64} from "./libraries/Base64.sol";
 // 継承したコントラクトのメソッドにアクセスできるようになります。
 contract MyEpicNFT is ERC721URIStorage {
     // OpenZeppelin が tokenIds を簡単に追跡するために提供するライブラリを呼び出しています
-    // トラッキングの際に起こりうるオーバーフロー(インクリメントしていくから)を防ぐらしい
+    // トラッキングの際に起こりうる(tokenIdsをインクリメントしているので)オーバーフローを防ぐらしい
     using Counters for Counters.Counter;
 
     // _tokenIds用意(初期値:0)
